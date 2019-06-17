@@ -5,14 +5,15 @@ List below are the major datasets and scripts that were used for the analysis. N
 
 <pre>
 \- data    
-  |\- se.rda: `RangedSummariedExperiment` instance as a container containing gene counts, gene annotation and metadata. Unfiltered.  
-  |\- sanitized.dds.rda:  sanitied/filtered `DESeqDataSet` used for downstream analysis  
-  |\- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset used to visualize sample space    
+  |- se.rda: `RangedSummariedExperiment` instance as a container containing gene counts, gene annotation and metadata. Unfiltered.  
+  |- sanitized.dds.rda:  sanitied/filtered `DESeqDataSet` used for downstream analysis  
+  |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset used to visualize sample space    
 \- scripts      
-  |\- \*.Rmd:  R markdown document and notebook  
-  |\- makeSE.R: get gene count and make a `RangedSummarizedExperiment` instance  
-  |\- \*.R: scripts for exploratory analysis and for manuscript  
+  |- *.Rmd:  R markdown document and notebook  
+  |- makeSE.R: get gene count and make a `RangedSummarizedExperiment` instance  
+  |- *.R: scripts for exploratory analysis and for manuscript  
 </pre>
+
 ## system requirement
 - R (3.5): pheatmap, xlsx, ggplot2, gridExtra
 - Bioconductor (3.7)
