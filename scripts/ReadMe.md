@@ -1,4 +1,5 @@
 ## Raw Data
+
 I:   `/shared/ngs/illumina/lsnider/151002_SN367_0557_AHC5HLBCXX` 
 
 II:  `/shared/ngs/illumina/lsnider/160208_SN367_0613_BHJFJ3BCXX`
@@ -10,7 +11,9 @@ IV: `/shared/ngs/illumina/lsnider/170119_D00300_0372_BH77YFBCXY`
 Discovery: `/shared/ngs/illumina/apfong/130419_SN367_0277_AC2192ACXX` and
 `/shared/ngs/illumina/apfong/130426_SN367_0278_AD26C4ACXX`.
 
+
 ## Work Flow
+
 The preprocess pipeline begins with removing low quality reads that
 did not pass the CHASTITY filtering step and then trimming the TruSeq
 adapter by using Trimmomatic. The trimmed reads are aligned to hg38 by
@@ -34,6 +37,7 @@ makeSE.R -> rankScore.R -> makeManuscripts_scatterPlot.R
 
 
 ## Sample Info
+
 as.data.frame(colData(sanitized.dds)[, c("Batch", "pheno_type",
 "Input", "Mapped")])
 
