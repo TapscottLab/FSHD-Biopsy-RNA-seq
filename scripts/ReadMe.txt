@@ -1,0 +1,110 @@
+## Raw Data
+I:   `/shared/ngs/illumina/lsnider/151002_SN367_0557_AHC5HLBCXX` 
+
+II:  `/shared/ngs/illumina/lsnider/160208_SN367_0613_BHJFJ3BCXX`
+
+III: `/shared/ngs/illumina/lsnider/160908_D00300_0314_AC9NKGANXX`
+
+IV: `/shared/ngs/illumina/lsnider/170119_D00300_0372_BH77YFBCXY`
+
+Discovery: `/shared/ngs/illumina/apfong/130419_SN367_0277_AC2192ACXX` and
+`/shared/ngs/illumina/apfong/130426_SN367_0278_AD26C4ACXX`.
+
+## Work Flow
+The preprocess pipeline begins with removing low quality reads that
+did not pass the CHASTITY filtering step and then trimming the TruSeq
+adapter by using Trimmomatic. The trimmed reads are aligned to hg38 by
+Tophat2/BowTie2. 
+
+1.  Remove reads that did not pass the CHASTITY filtering step
+2.  Adapter trimming: trimmomatic-0.32
+java -jar /home/solexa/apps/trimmomatic/Trimmomatic-0.32/trimmomatic-0.32.jar SE -threads 6 $fqFile $trimFq ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 MINLEN:36
+3.  Trim deteriorated tails
+4.  Fastqc again
+5. Alignment: Tophat2/Bowtie2
+
+(step 2 - 5: do_tophat.sh)
+
+6. Checking fastqc by eyes
+7. makeSE: sanitize samples, gene counts, input, mapping rate, lib_size and sizeFactor
+8. Rank !
+9. Produce tables and figures
+
+makeSE.R -> rankScore.R -> makeManuscripts_scatterPlot.R
+
+
+## Sample Info
+as.data.frame(colData(sanitized.dds)[, c("Batch", "pheno_type",
+"Input", "Mapped")])
+
+        Batch pheno_type      Input                      Mapped sizeFactor
+0534       IV       FSHD   33591129   32305864 (96.2% of input)  0.5881124
+0952-1    III       FSHD   79896520   77632355 (97.2% of input)  1.4728558
+1025      III       FSHD   77107797   74811532 (97.0% of input)  1.1574856
+1614      III       FSHD   64494152   62524966 (96.9% of input)  0.9747698
+1788      III       FSHD   77471651   75032909 (96.9% of input)  2.1264497
+2060      III       FSHD   72225917   70058975 (97.0% of input)  1.5155158
+2319      III       FSHD   79839404   77256996 (96.8% of input)  1.8483287
+2332      III       FSHD   70886332   68648136 (96.8% of input)  1.5484663
+2358      III       FSHD   83645300   81195678 (97.1% of input)  1.7897494
+2399       IV       FSHD   30493330   29349361 (96.2% of input)  0.5603433
+2411      III       FSHD   86769275   83980172 (96.8% of input)  1.4670495
+2422      III       FSHD   76816832   74629333 (97.2% of input)  1.1936739
+2456      III       FSHD   76360860   73871622 (96.7% of input)  1.4064607
+2470       II       FSHD   46592585   44191562 (94.8% of input)  0.6824173
+2524      III    Control   75256045   73038271 (97.1% of input)  1.1142572
+2536      III    Control   83941874   81466191 (97.1% of input)  1.2924339
+2538      III    Control   87511226   84959502 (97.1% of input)  1.3425720
+2539      III    Control   85722145   83321839 (97.2% of input)  1.4190614
+2540      III    Control   82327084   79814237 (96.9% of input)  1.3256809
+2550       IV    Control   30678187   29549805 (96.3% of input)  0.5058062
+2559       IV    Control   29206749   28190744 (96.5% of input)  0.4745146
+2563      III    Control   82079832   79749178 (97.2% of input)  1.3810781
+2567       II       FSHD   37405895   28623469 (76.5% of input)  1.1852420
+2578       IV    Control   30853269   29513762 (95.7% of input)  0.4434396
+2583       IV       FSHD   33518570   32186456 (96.0% of input)  0.6407960
+32-0002     I       FSHD   49782655   48085124 (96.6% of input)  0.9925516
+32-0003     I       FSHD   47468797   45825212 (96.5% of input)  1.2103876
+32-0004     I       FSHD   54660027   52485859 (96.0% of input)  1.4828741
+32-0005     I       FSHD   45161371   43554568 (96.4% of input)  1.3957693
+32-0006     I       FSHD   47039396   45422687 (96.6% of input)  1.2180615
+32-0007    II       FSHD   42290565   40250633 (95.2% of input)  0.7638525
+32-0008    II       FSHD   26909978   18226666 (67.7% of input)  0.3510058
+32-0009    II       FSHD   39780357   34053741 (85.6% of input)  1.0553169
+32-0010   III       FSHD   81839090   79515686 (97.2% of input)  1.3521314
+32-0011   III       FSHD   74633723   72545166 (97.2% of input)  1.2950849
+32-0012   III       FSHD   80500341   78100468 (97.0% of input)  1.4860887
+32-0013   III       FSHD   80015657   77700135 (97.1% of input)  1.3058698
+32-0014   III       FSHD   73152179   71054624 (97.1% of input)  1.0932416
+32-0015    IV       FSHD   33045736   31849675 (96.4% of input)  0.5169257
+32-0016    IV       FSHD   23409102   22298704 (95.3% of input)  0.9350029
+32-0017    IV       FSHD   27503853   26383674 (95.9% of input)  0.6891481
+32-0018    IV       FSHD   32711482   31565457 (96.5% of input)  0.5315573
+32-0019    IV       FSHD   31747604   30529008 (96.2% of input)  0.5316572
+
+NOTE: sample 2567 has 0.65% of overrepresented sequences
+CTCAGATTGAACGCTGGCGGCAGGCCTAACACATGCAAGTCGAACGGTAA	124857	0.33378963396010175	No Hit
+GCCTGATGCAGCCATGCCGCGTGTATGAAGAAGGCCTTCGGGTTGTAAAG	68760	0.183821293408432	No Hit
+CTCCGTATTACCGCGGCTGCTGGCACGGAGTTAGCCGGTGCTTCTTCTGC	53978
+0.14430345805119754	No Hit
+
+NOTE: Sample 32-0008 also has 2.3%  of overrepresented sequences
+
+CTCAGATTGAACGCTGGCGGCAGGCCTAACACATGCAAGTCGAACGGTAA	152444	0.5664961896289918	No Hit
+GCCTGATGCAGCCATGCCGCGTGTATGAAGAAGGCCTTCGGGTTGTAAAG	68075	0.25297307935368807	No Hit
+CTCCGTATTACCGCGGCTGCTGGCACGGAGTTAGCCGGTGCTTCTTCTGC	62681	0.23292846987834773	No Hit
+CCCCACTGCTGCCTCCCGTAGGAGTCTGGACCGTGTCTCAGTTCCAGTGT	38074	0.14148655193995327	No Hit
+GTCGGTTCGGTCCTCCAGTTAGTGTTACCCAACCTTCAACCTGCCCATGG	35581	0.13222233031925928	No Hit
+CGGGAACTCAAAGGAGACTGCCAGTGATAAACTGGAGGAAGGTGGGGATG	34544	0.12836874114129712	No Hit
+CTCCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAAGCCTG	34015	0.126402927568354	No Hit
+CCCACTGCTGCCTCCCGTAGGAGTCTGGACCGTGTCTCAGTTCCAGTGTG	32720	0.12159058621303964	No Hit
+CGGGGATTTCACATCTGACTTAACAAACCGCCTGCGTGCGCTTTACGCCC	32622	0.12122640902939423	No Hit
+CTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAAGCCTGATG	30895	0.1148087151910715	No Hit
+GTTTGATCATGGCTCAGATTGAACGCTGGCGGCAGGCCTAACACATGCAA	29201	0.10851365244520081	No Hit
+CCACGCTTTCGCACCTGAGCGTCAGTCTTCGTCCAGGGGGCCGCCTTCGC	28069	0.10430703436472523	No Hit
+CCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAAGCCTGAT	27462	0.10205136548235008	No Hit
+GCGACTTATATTCTGTAGCAAGGTTAACCGAATAGGGGAGCCGAAGGGAA	27237	0.1012152443974499	No Hit
+
+# The forth and Fifth batch for second visit
+The raw reads are here: /fh/fast/tapscott_s/SR/ngs/illumina/acampbel/171025_D00300_0490_ACBY30ANXX/Unaligned/Project_acampbel/
+~                                       
