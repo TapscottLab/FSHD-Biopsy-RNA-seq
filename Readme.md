@@ -1,4 +1,4 @@
-This package contains both datasets and scripts (R) supporting the manuscript of MRI-informed muscle biopsies correlate MRI with pathlogy and DUX4 target gene expression in FSHD.  The shell script `/scripts/do_tophat.sh` performed the preprocessing and `/scripts/*.R` the analysis for the manuscript. 
+This package contains both datasets and scripts (R) supporting the manuscript of MRI-informed muscle biopsies correlate MRI with pathology and DUX4 target gene expression in FSHD.  The shell script `/scripts/do_tophat.sh` performed the preprocessing and `/scripts/*.R` the analysis for the manuscript. 
 
 ## Folders
 List below are the major datasets and scripts that were used for the analysis. Note that the scripts for data exploratory are also included in the *scripts* folder, and so they might be a bit messy.
@@ -6,7 +6,7 @@ List below are the major datasets and scripts that were used for the analysis. N
 <pre>
 \- data    
   |- se.rda: `RangedSummariedExperiment` instance as a container containing gene counts, gene annotation and metadata. Unfiltered.  
-  |- sanitized.dds.rda:  sanitied/filtered `DESeqDataSet` used for downstream analysis  
+  |- sanitized.dds.rda: sanitied/filtered `DESeqDataSet` used for downstream analysis  
   |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset used to visualize sample space    
 \- scripts      
   |- *.Rmd:  R markdown document and notebook  
