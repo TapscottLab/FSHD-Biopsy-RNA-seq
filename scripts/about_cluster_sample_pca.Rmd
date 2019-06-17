@@ -1,0 +1,152 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+## Loading libraries and load clean data
+```{r load_library}
+suppressPackageStartupMessages(library(DESeq2))
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(reshape))
+```
+Load and process `sanitized.dds` - renamig and adding column data.
+```{r load_data}
+pkgDir <- "/fh/fast/tapscott_s/CompBio/RNA-Seq/hg38.FSHD.biopsyI-IV"
+source(file.path(pkgDir, "scripts", "viz_tools.R"))
+source(file.path(pkgDir, "scripts", "renameSample.R"))
+dataDir <- file.path(pkgDir, "data")
+figDir <- file.path(pkgDir, "manuscript", "figures")
+load(file.path(pkgDir, "data", "sanitized.dds.rda"))
+load(file.path(pkgDir, "data", "mk.rda"))
+load(file.path(pkgDir, "data", "fourmk.rda"))
+source(file.path(pkgDir, "scripts", "renameSample.R"))
+new_sampleID <- renameSample(colnames(sanitized.dds))
+sanitized.dds$new_sampleID <- new_sampleID
+colnames(sanitized.dds) <- new_sampleID
+sanitized.dds$RNA.Group <- 
+  paste0("G", sanitized.dds$RNA.Cluster,
+         "_", sanitized.dds$pheno_type)
+sanitized.dds$RNA.Group <- 
+  factor(sanitized.dds$RNA.Group)
+rlg <- rlog(sanitized.dds, 
+            blind=TRUE)
+```
+
+## Defind dold group
+cold group = G1_FSHD and Control
+```{r define_cold_group}
+#' sample subset - Group1 including control and some FSHD
+cold_group <- sanitized.dds$RNA.Cluster %in% c(1)
+```
+
+## Questions
+- Can we separate the G1_FSHD and G2_FSHD samples from the controls?
+
+- If yes, how many dimenstion of PCA is appropriate? and which genes are responsible for the separation??pr
+
+
+## PCA
+
+### Feature selection
+Pre-select top one-thired genes with most vairation.
+
+```{r pre_selction}
+pre_selection <- function(
+  method=c("by_DESeq", "by_rowVars"), ntop=500, object) {
+  if (method == "by_DESeq") {
+    dds <- DESeq(object)
+    res <- results(dds)
+    res <- res[order(res$padj), ]
+    pre_selected <- rownames(res)[1:ntop]
+  }
+  
+  if (method == "by_rowVars") {
+    rv <- rowVars(assay(object))
+    idx <- 
+      order(rv, decreasing=TRUE)[seq_len(min(ntop,
+                                             length(rv)))]
+    pre_selected <- rownames(object)[idx]
+    
+  }
+  pre_selected
+}
+```
+
+```{r do_selection}
+pre_sel <- pre_selection(ntop=1000, method="by_rowVars",
+                         object=rlg[, cold_group])
+```
+
+```{r simple_pca}
+sub_rlg <- rlg[pre_sel, cold_group]
+pca <- prcomp(t(assay(sub_rlg)))
+percentVar <- pca$sdev^2 / sum( pca$sdev^2 )
+
+#' arrange the returned pca data
+library(RColorBrewer)
+myPal <- brewer.pal(4, "Set2")
+myPal <- c("pink", "green")
+myCol <- myPal[factor(sub_rlg$RNA.Group)]
+pairs(pca$x[, 1:4], col=myCol)
+```
+
+```{r show_pca_var}
+#' umsum(percentVar)
+plot(cumsum(percentVar), type="l",
+     xlab="number of PC",
+     ylab="cummulative variance")
+```
+
+### Importand features
+Identify the top 100 impartant features that maximize the variance among samples.
+
+```{r important_features}
+library(pheatmap)
+loadings <- abs(pca$rotation)
+getNTop <- function(pc_loading, name="PC1", ntop=10) {
+  ord <- order(pc_loading[, name], decreasing=TRUE)
+  rownames(pc_loading[ord[1:ntop], ])
+}
+
+ntop <- 100
+ntop_df <- data.frame(PC1=getNTop(loadings, "PC1", ntop),
+                      PC2=getNTop(loadings, "PC2", ntop))
+
+ntop_features <- unique(union(ntop_df$PC1, ntop_df$PC2))
+```
+
+Prepare data for plotting heatmap.
+```{r viz_heatmap}
+data <- assay(sub_rlg[ntop_features, ])
+rownames(data) <-
+  rowData(sub_rlg[ntop_features])$gene_name
+annotation_col <- data.frame(RNA.Group=sub_rlg$RNA.Group)
+rownames(annotation_col) <- colnames(sub_rlg)
+pheatmap(data, 
+         annotation_col=annotation_col,
+         fontsize_row=4, 
+         show_rownames=FALSE,
+         clustering_distance_rows = "manhattan",
+         clustering_distance_cols = "manhattan",
+         scale="row")
+```
+
+Output the heatmap to a PDF file.
+```{r output_import_feature}
+pheatmap(data, 
+         annotation_col=annotation_col,
+         fontsize_row=2, 
+         show_rownames=TRUE,
+         scale="row",
+         silent=TRUE,
+         clustering_distance_rows = "manhattan",
+         clustering_distance_cols = "manhattan",
+         filename=file.path(pkgDir, "figures",
+           "heatmap_pca_loading_top100.pdf"))
+```
+## Sparse PCA
+Use the sparse PCA to find the most important features that differentiate Control and the G1_FSHD outliers.
+```{r session_info}
+sessionInfo()
+```

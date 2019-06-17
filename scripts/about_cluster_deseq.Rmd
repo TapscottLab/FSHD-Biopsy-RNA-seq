@@ -1,0 +1,219 @@
+---
+title: "DESeq analysis for Groups of FSHD"
+output: html_notebook
+---
+## Load libraries and clean up dataset
+```{r load_library}
+suppressPackageStartupMessages(library(DESeq2))
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(reshape))
+```
+Load and process `sanitized.dds` - renamig and adding column data.
+```{r load_data}
+pkgDir <- "/fh/fast/tapscott_s/CompBio/RNA-Seq/hg38.FSHD.biopsyI-IV"
+source(file.path(pkgDir, "scripts", "viz_tools.R"))
+source(file.path(pkgDir, "scripts", "renameSample.R"))
+source(file.path(pkgDir, "scripts", "misc_tools.R"))
+
+#' define directory
+dataDir <- file.path(pkgDir, "data")
+figDir <- file.path(pkgDir, "figures")
+statsDir <- file.path(pkgDir, "manuscript", "tables")
+
+#' dataset
+load(file.path(pkgDir, "data", "sanitized.dds.rda"))
+load(file.path(pkgDir, "data", "mk.rda"))
+load(file.path(pkgDir, "data", "fourmk.rda"))
+
+#' clean up sanitized.dds
+new_sampleID <- renameSample(colnames(sanitized.dds))
+sanitized.dds$new_sampleID <- new_sampleID
+colnames(sanitized.dds) <- new_sampleID
+sanitized.dds$RNA.Group <- 
+  paste0("G", sanitized.dds$RNA.Cluster,
+         "_", sanitized.dds$pheno_type)
+sanitized.dds$RNA.Group <- 
+  factor(sanitized.dds$RNA.Group)
+```
+### Biomarkers ID
+```{r biomarker_id}
+biomarker.id <- c(PRAMEF2="ENSG00000120952.4",
+                  TRIM43="ENSG00000144015.4",
+                  KHDC1L="ENSG00000256980.4",
+                  LEUTX="ENSG00000213921.6")
+other.id <- c(DUXA="ENSG00000258873.2",
+              ZSCAN4="ENSG00000180532.10")
+#' DUXA=ENSG00000258873.2, zscan4=ENSG00000180532.10
+```
+## Define thresholds for differentially expressed genes
+The differentially expressed genes in FSHD relative controls are identified if the following criteria is met:
+
+- adjusted p-val < 0.05
+
+- abs(log fold change) > 2
+```{r threshold}
+padj_threshold <- 0.05
+lfc_threshold  <- 2
+```
+
+## Group1_FSHD vs. Control
+There are total 393 differentially expressed genes and only one is biomarker.
+```{r g1_fshd}
+idx <- sanitized.dds$RNA.Cluster == "1" |
+  sanitized.dds$pheno_type == "Control"
+sub <- sanitized.dds[, idx]
+res1 <- do_deseq(se=sub, mk=mk,
+                 title="G1FSHD_vs_Control",
+                 logFC.threshold=lfc_threshold,
+                 alpha=padj_threshold,
+                 statsDir=statsDir)
+sig_res1 <- 
+  summaryDESeqResults(res1,
+                      padj.threshold=padj_threshold,
+                      lfc.threshold=lfc_threshold)
+```
+
+## Group1 (without outlier) vs. Control
+Exclude the G1_FHSD outliers (o1-0037 and 32-0016) and compare Group 1 FSHD to the controls.
+
+Only 40 genes are differentially expressed and none of it is biomarker.
+
+```{r g1_fshd_no_outliers}
+outliers_sample <- c("01-0037", "32-0016")
+dont_keep <- which(colnames(sub) %in% outliers_sample)
+new_sub <- sub[, -dont_keep]
+res1_no_outlier <- do_deseq(se=new_sub, mk=mk,
+                 title="G1FSHD_no_Outliers_vs_Control",
+                 logFC.threshold=lfc_threshold,
+                 alpha=padj_threshold,
+                 statsDir=statsDir)
+sig_res1_no_outlier <- 
+  summaryDESeqResults(res1_no_outlier,
+                      padj.threshold=padj_threshold,
+                      lfc.threshold=lfc_threshold)
+```
+
+
+## Group1_FSHD_Outliers vs. Control
+Here use Group 1 FSHD outliers (01-0037 and 32-0016) to compare the controls.
+```{r g1_fshd_outliers}
+outliers_sample <- c("01-0037", "32-0016")
+idx <- colnames(sanitized.dds) %in% outliers_sample |
+  sanitized.dds$pheno_type == "Control"
+sub <- sanitized.dds[, idx]
+res1_outlier <- do_deseq(se=sub, mk=mk,
+                 title="G1FSHD_Outliers_vs_Control",
+                 logFC.threshold=lfc_threshold,
+                 alpha=padj_threshold,
+                 statsDir=statsDir)
+sig_res1_outlier <- 
+  summaryDESeqResults(res1_outlier,
+                      padj.threshold=padj_threshold,
+                      lfc.threshold=lfc_threshold) 
+```
+
+## Group2_FSHD vs. Control
+303 DE and three are biomarkers.
+```{r g2_fshd}
+idx <- sanitized.dds$RNA.Cluster == "2" |
+  sanitized.dds$pheno_type == "Control"
+sub <- sanitized.dds[, idx]
+res2 <- do_deseq(se=sub, mk=mk,
+                 title="G2FSHD_vs_Control",
+                 logFC.threshold=lfc_threshold,
+                 alpha=padj_threshold,
+                 statsDir=statsDir)
+sig_res2 <- 
+  summaryDESeqResults(res2,
+                      padj.threshold=padj_threshold,
+                      lfc.threshold=lfc_threshold) 
+```
+
+## Group2_FSHD_active vs. Control
+The active FSHD samples are 01-0030 (2358), 32-0007 and 32-0013. 540 genes are differentiallye expressed in G2_FSHD and three are biomarkers.
+```{r g2_fshd_active}
+outliers_sample <- c("01-0030", "32-0007", "32-0013")
+idx <- colnames(sanitized.dds) %in% outliers_sample |
+  sanitized.dds$pheno_type == "Control"
+sub <- sanitized.dds[, idx]
+res2_active <- do_deseq(se=sub, mk=mk,
+                 title="G2FSHD_active_vs_Control",
+                 logFC.threshold=lfc_threshold,
+                 alpha=padj_threshold,
+                 statsDir=statsDir)
+sig_res2_active <- 
+  summaryDESeqResults(res2_active,
+                      padj.threshold=padj_threshold,
+                      lfc.threshold=lfc_threshold) 
+```
+## Group3_FSHD vs. Control
+816 are differentially expressed in G3_FSHD and 47 are biomarkers.
+
+```{r g3_fshd}
+idx <- sanitized.dds$RNA.Cluster == "3" |
+  sanitized.dds$pheno_type == "Control"
+sub <- sanitized.dds[, idx]
+res3 <- do_deseq(se=sub, mk=mk,
+                 title="G3FSHD_vs_Control",
+                 logFC.threshold=lfc_threshold,
+                 alpha=padj_threshold,
+                 statsDir=statsDir)
+sig_res3 <- 
+  summaryDESeqResults(res3,
+                      padj.threshold=padj_threshold,
+                      lfc.threshold=lfc_threshold) 
+```
+## Group4_FSHD vs. Control
+2,826 genes are differentially expressed in G4_FSHD and 54 are the robust biomarkers.
+
+```{r g4_fshd}
+idx <- sanitized.dds$RNA.Cluster == "4" |
+  sanitized.dds$pheno_type == "Control"
+sub <- sanitized.dds[, idx]
+res4 <- do_deseq(se=sub, mk=mk,
+                 title="G4FSHD_vs_Control",
+                 logFC.threshold=lfc_threshold,
+                 alpha=padj_threshold,
+                 statsDir=statsDir)
+sig_res4 <- 
+  summaryDESeqResults(res4,
+                      padj.threshold=padj_threshold,
+                      lfc.threshold=lfc_threshold) 
+```
+
+## Visualization
+
+
+### upset diagarm
+```{r prepare_upsat}
+de_list <- list(G1_FSHD=sig_res1,
+                G2_FSHD=sig_res2,
+                G3_FSHD=sig_res3,
+                G4_FSHD=sig_res4)
+common_sig <- unique(unlist(sapply(de_list, rownames)))
+df <- sapply(de_list, function(x) {
+  as.numeric(common_sig %in% rownames(x))
+})
+rownames(df) <- common_sig
+df <- as.data.frame(df)
+```
+```{r upset}
+library(UpSetR, quietly=TRUE)
+upset(df)
+```
+
+```{r output_upset}
+pdf(file.path(figDir, "upset_sig_gene_groups.pdf"))
+upset(df)
+dev.off()
+```
+### How about just looking at the DE genes that are responsible for the enrichment of certain GO terms: immune, inflamm, extraceller matrix, and cell death.
+
+
+
+## R session info
+```{r session_info}
+sessionInfo()
+```
