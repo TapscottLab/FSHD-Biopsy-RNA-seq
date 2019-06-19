@@ -5,10 +5,11 @@ List below are the major datasets and scripts that were used for the analysis. N
 
 <pre>
 \- data    
-  |- se.rda: `RangedSummarizedExperiment` instance as a container containing gene counts, gene annotation and metadata. Unfiltered.  
+  |- se.rda: `RangedSummarizedExperiment` instance as a container containing gene counts, gene annotation and 
+     metadata. 
   |- sanitized.dds.rda: sanitied/filtered `DESeqDataSet` of `se`, containing dispersion estimation and size factor, 
      used for downstream analysis  
-  |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset of sanitized.dds used to visualize sample space    
+  |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset of sanitized.dds, used to visualize sample space    
   
 \- scripts      
   |- *.Rmd:  R markdown document and notebook  
