@@ -5,9 +5,10 @@ List below are the major datasets and scripts that were used for the analysis. N
 
 <pre>
 \- data    
-  |- se.rda: `RangedSummariedExperiment` instance as a container containing gene counts, gene annotation and metadata. Unfiltered.  
-  |- sanitized.dds.rda: sanitied/filtered `DESeqDataSet` used for downstream analysis  
-  |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset used to visualize sample space    
+  |- se.rda: `RangedSummarizedExperiment` instance as a container containing gene counts, gene annotation and metadata. Unfiltered.  
+  |- sanitized.dds.rda: sanitied/filtered `DESeqDataSet` of `se`, containing dispersion estimation and size factor, 
+     used for downstream analysis  
+  |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset of sanitized.dds used to visualize sample space    
   
 \- scripts      
   |- *.Rmd:  R markdown document and notebook  
@@ -16,7 +17,9 @@ List below are the major datasets and scripts that were used for the analysis. N
   |- makeManuscripts_scatterPlot.R: make Figure 1
 </pre>
 
-makeSE.R -> rankScore.R -> makeManuscripts_scatterPlot.R
+### Main analysis
+
+makeSE.R -> rankScore.R -> makeManuscripts_scatterPlot.R -> Figure 1
 
 ## system requirement
 - R (3.5): pheatmap, xlsx, ggplot2, gridExtra
