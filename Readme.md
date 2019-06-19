@@ -4,14 +4,15 @@ This package contains both datasets and scripts (R) supporting the manuscript of
 List below are the major datasets and scripts that were used for the analysis. Note that the scripts for data exploratory are also included in the *scripts* folder, and so they might be a bit messy.
 
 <pre>
-\- data    
+|- data    
   |- se.rda: `RangedSummarizedExperiment` instance as a container containing gene counts, gene annotation and 
      metadata. 
-  |- sanitized.dds.rda: sanitied/filtered `DESeqDataSet` of `se`, containing dispersion estimation and size factor, 
-     used for downstream analysis  
-  |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset of sanitized.dds, used to visualize sample space    
+  |- sanitized.dds.rda: sanitied/filtered `DESeqDataSet` of `se`, containing dispersion estimation and size 
+     factor, used for downstream analysis  
+  |- sanitized.rlg.rda: sanitized/filtered rlog-transformed dataset of sanitized.dds, used to visualize 
+     sample space    
   
-\- scripts      
+|- scripts      
   |- *.Rmd:  R markdown document and notebook  
   |- makeSE.R: get gene count and make a `RangedSummarizedExperiment` instance  
   |- rankScore.R: get DUX4 rank and scores
